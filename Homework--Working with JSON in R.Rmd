@@ -1,0 +1,86 @@
+---
+title: "Working with JSON in R"
+author: "Shane Hylton"
+date: "10/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The Files
+
+## Reading from JSON
+
+```{r}
+library(tidyjson)
+
+link <- 'https://raw.githubusercontent.com/st3vejobs/Data-607-Working-with-JSON-in-R-/main/books.json'
+
+jsonbooks <- jsonlite::fromJSON(link)
+jsonbooks <- data.frame(jsonbooks)
+jsonbooks
+```
+
+
+## Reading from XML
+
+```{r}
+library(xml2)
+library(XML)
+library(RCurl)
+library(tidyverse)
+
+link <- "https://raw.githubusercontent.com/st3vejobs/Data-607-Working-with-JSON-in-R-/main/books.xml"
+data <- getURL(link)
+
+xmlraw <- xmlParse(data)
+xmllist <- xmlToList(xmlraw)
+xmlunlist <- unlist(xmllist)
+
+xmlunlist <- xmlunlist[1:4]
+
+x <- data.frame(xmlunlist)
+xmlbooks <- data.frame(t(x))
+rownames(xmlbooks) <- c()
+xmlbooks
+```
+
+## Reading from HTML
+
+```{r}
+library(textreadr)
+library(stringr)
+link <- "https://raw.githubusercontent.com/st3vejobs/Data-607-Working-with-JSON-in-R-/main/books.html"
+rawHTML <- read_html(link)
+booksraw <- unlist(rawHTML)
+
+header <- c(str_extract(booksraw[1], "[A-Za-z]+"))
+header <- append(header, str_extract(booksraw[2], "[A-Za-z]+"))
+header <- append(header, str_extract(booksraw[3], "[A-Za-z]+"))
+header <- append(header, str_extract(booksraw[4], "[A-Za-z]+"))
+
+
+books1 <- str_remove(booksraw[1], "[A-Za-z]+")
+books1 <- str_remove_all(books1, '[[:punct:]]')
+books2 <- str_remove(booksraw[2], "[A-Za-z]+")
+books2 <- str_remove_all(books2, '[[:punct:]]')
+books3 <- str_remove(booksraw[3], "[A-Za-z]+")
+books3 <- str_remove_all(books3, '[[:punct:]]')
+books4 <- str_remove(booksraw[4], "[A-Za-z]+")
+books4 <- str_remove_all(books4, '[[:punct:]]')
+
+
+books <- c(books1,books2,books3,books4)
+bookshtml <- data.frame()
+bookshtml <- rbind(bookshtml, books)
+colnames(bookshtml) <- header
+bookshtml
+```
+
+
+
+## Comments
+
+These data frames did not load in the same manner, and they all required different techniques to tidy them to appear identical. JSON was the simplest format to turn into a data frame. In the end, the final data frames are in the same format. 
